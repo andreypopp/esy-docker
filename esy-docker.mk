@@ -37,6 +37,7 @@ endef
 export DOCKERFILE_ESY
 
 define DOCKERIGNORE
+.git
 node_modules
 _esy
 endef
