@@ -117,7 +117,7 @@ print-usage:
 	@echo "$$DOCKERFILE_ESY" > $(@)
 
 .docker:
-	mkdir -p $(@)
+	@mkdir -p $(@)
 
 .PHONY: .docker/Dockerfile.esy
 .docker/Dockerfile.esy: .docker
