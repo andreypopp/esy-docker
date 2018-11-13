@@ -10,7 +10,7 @@ RUN mkdir /esy
 WORKDIR /esy
 
 ENV NPM_CONFIG_PREFIX=/esy
-RUN npm install -g --unsafe-perm @esy-nightly/esy@0.4.0-33b899
+RUN npm install -g --unsafe-perm esy@0.4.0
 
 # now that we have esy installed we need a proper runtime
 
