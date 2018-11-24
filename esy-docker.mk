@@ -66,12 +66,13 @@ function findAllPackageIds(lock) {
   }
 
   function traverse(id) {
-    if (ids.indexOf(id) !== -1) {
-      return ids;
-    }
-    traveseDependencies(id);
     let [name, version, _hash] = id.split('@');
-    ids.push(`$${name}@$${version}`);
+    let pkgid = `$${name}@$${version}`;
+    if (ids.indexOf(pkgid) !== -1) {
+      return;
+    }
+    ids.push(pkgid);
+    traveseDependencies(id);
   }
 
   traveseDependencies(lock.root, lock.node[lock.root]);
