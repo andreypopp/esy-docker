@@ -70,7 +70,8 @@ function findAllPackageIds(lock) {
       return ids;
     }
     traveseDependencies(id);
-    ids.push(id);
+    let [name, version, _hash] = id.split('@');
+    ids.push(`$${name}@$${version}`);
   }
 
   traveseDependencies(lock.root, lock.node[lock.root]);
