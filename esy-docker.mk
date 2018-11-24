@@ -132,10 +132,10 @@ print-usage:
 	@echo "$$DOCKERIGNORE" > $(@)
 
 .docker/image.esy: .docker .dockerignore .docker/Dockerfile.esy
-	@docker build . -f .docker/Dockerfile.esy -q > $(@)
+	@docker build . -f .docker/Dockerfile.esy --iidfile $(@)
 
 .docker/image.app: .docker .dockerignore .docker/Dockerfile.app
-	@docker build . -f .docker/Dockerfile.app -q > $(@)
+	@docker build . -f .docker/Dockerfile.app --iidfile $(@)
 
 esy-docker-shell-esy: .docker/image.esy
 	@docker run -it $$(cat .docker/image.esy) /bin/bash
