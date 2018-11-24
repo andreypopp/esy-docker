@@ -71,8 +71,8 @@ function findAllPackageIds(lock) {
     if (ids.indexOf(pkgid) !== -1) {
       return;
     }
-    ids.push(pkgid);
     traveseDependencies(id);
+    ids.push(pkgid);
   }
 
   traveseDependencies(lock.root, lock.node[lock.root]);
