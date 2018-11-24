@@ -7,7 +7,7 @@ A set of make rules to produce docker images for esy projects.
 ## Usage
 
 A project should have a lockfile generated using a compatible version of esy.
-Currently `esy-docker` depends on esy@0.4.0.
+Currently `esy-docker` depends on esy@0.4.3.
 
 Drop `esy-docker.mk` in your project and create a `Makefile` which includes it:
 
