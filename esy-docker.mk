@@ -92,6 +92,7 @@ const lines = [
   'WORKDIR /app',
   'COPY package.json package.json',
   'COPY esy.lock esy.lock',
+  'RUN esy solve',
   'RUN esy fetch',
   ...build,
   'COPY . .',
