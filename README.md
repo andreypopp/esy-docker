@@ -59,11 +59,6 @@ builder container and then copy over needed build artifacts from there:
   then export builds artifacts from there as `*.tgz`. Then such generated
   Dockerfile can import `*.tgz` instead whcih is much faster.
 
-- Drop NodeJS dependency.
-
-  Currently we use NodeJS script to read a project lockfile and generate a
-  Dockerfile. We can use something more widely available.
-
 ## Related work
 
 This work was done based on:
