@@ -1,3 +1,12 @@
+SHELL = /bin/bash
+
+define newline
+
+
+endef
+
+EMIT = echo -e '$(subst $(newline),\n,$(1))'
+
 define DOCKERFILE_ESY
 # start from node image so we can install esy from npm
 
@@ -34,72 +43,23 @@ RUN apk add --no-cache glibc-2.28-r0.apk
 
 ENV PATH=/esy/bin:$$PATH
 endef
-export DOCKERFILE_ESY
 
 define DOCKERIGNORE
 .git
 node_modules
 _esy
 endef
-export DOCKERIGNORE
 
-define GEN_DOCKERFILE_APP
-let fs = require('fs');
-let childProcess = require('child_process');
-
-let lock = JSON.parse(fs.readFileSync('./esy.lock/index.json').toString('utf8'));
-
-function findAllPackageIds(lock) {
-  let ids = [];
-
-  function traveseDependencies(id) {
-    let node = lock.node[id];
-    let dependencies = node.dependencies || [];
-    let devDependencies = node.devDependencies || [];
-
-    let allDependencies = dependencies.concat(devDependencies);
-    allDependencies.sort();
-
-    for (let dep of allDependencies) {
-      traverse(dep, lock.node[dep])
-    }
-  }
-
-  function traverse(id) {
-    let [name, version, _hash] = id.split('@');
-    let pkgid = `$${name}@$${version}`;
-    if (ids.indexOf(pkgid) !== -1) {
-      return;
-    }
-    traveseDependencies(id);
-    ids.push(pkgid);
-  }
-
-  traveseDependencies(lock.root, lock.node[lock.root]);
-
-  return ids;
-}
-
-let pkgs = findAllPackageIds(lock);
-
-const build = pkgs.map(pkg => `RUN esy build-package $${pkg}`);
-
-const esyImageId = process.argv[1];
-
-const lines = [
-  `FROM $${esyImageId}`,
-  'RUN mkdir /app',
-  'WORKDIR /app',
-  'COPY package.json package.json',
-  'COPY esy.lock esy.lock',
-  'RUN esy fetch',
-  ...build,
-  'COPY . .',
-]
-
-console.log(lines.join('\n'));
+define DOCKERFILE_APP
+FROM $(1)
+RUN mkdir /app
+WORKDIR /app
+COPY package.json package.json
+COPY esy.lock esy.lock
+RUN esy fetch
+RUN esy true
+COPY . .
 endef
-export GEN_DOCKERFILE_APP
 
 define USAGE
 Welcome to esy-docker!
@@ -108,8 +68,12 @@ This is a set of make rules to produce docker images for esy projects.
 
 You can execute the following targets:
 
-	esy-docker-build 		   Builds an application
-	esy-docker-shell       Builds an application and executes bash in a container
+  esy-docker-build    Builds an application
+  esy-docker-shell    Builds an application and executes bash in a container
+
+To make those targets available create a Makefile withe following lines:
+
+  include /path/to/esy-docker.mk
 
 endef
 export USAGE
@@ -117,21 +81,21 @@ export USAGE
 .DEFAULT: print-usage
 
 print-usage:
-	@echo "$$DOCKERFILE_ESY" > $(@)
+	@$(call EMIT,$(USAGE))
 
 .docker:
 	@mkdir -p $(@)
 
 .PHONY: .docker/Dockerfile.esy
 .docker/Dockerfile.esy: .docker
-	@echo "$$DOCKERFILE_ESY" > $(@)
+	@$(call EMIT,$(DOCKERFILE_ESY)) > $(@)
 
 .PHONY: Dockerfile.app
 .docker/Dockerfile.app: .docker .docker/image.esy
-	@node -e "$$GEN_DOCKERFILE_APP" $$(cat .docker/image.esy) > $(@)
+	@$(call EMIT,$(call DOCKERFILE_APP,$(shell cat .docker/image.esy))) > $(@)
 
 .dockerignore:
-	@echo "$$DOCKERIGNORE" > $(@)
+	@$(call EMIT,$(DOCKERIGNORE)) > $(@)
 
 .docker/image.esy: .docker .dockerignore .docker/Dockerfile.esy
 	@docker build . -f .docker/Dockerfile.esy --iidfile $(@)
