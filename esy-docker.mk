@@ -50,7 +50,7 @@ node_modules
 _esy
 endef
 
-define DOCKERFILE_APP
+define DOCKERFILE_DEPS
 FROM $(1)
 RUN mkdir /app
 WORKDIR /app
@@ -58,7 +58,16 @@ COPY package.json package.json
 COPY esy.lock esy.lock
 RUN esy fetch
 RUN esy true
+RUN rm -rf /root/.esy/3/b /root/.esy/3/s
+endef
+
+define DOCKERFILE_APP
+FROM $(1)
+COPY --from=$(2) /root/.esy/ /root/.esy
+RUN mkdir /app
+WORKDIR /app
 COPY . .
+RUN esy fetch
 endef
 
 define USAGE
@@ -90,15 +99,22 @@ print-usage:
 .docker/Dockerfile.esy: .docker
 	@$(call EMIT,$(DOCKERFILE_ESY)) > $(@)
 
+.PHONY: Dockerfile.deps
+.docker/Dockerfile.deps: .docker .docker/image.esy
+	@$(call EMIT,$(call DOCKERFILE_DEPS,$(shell cat .docker/image.esy))) > $(@)
+
 .PHONY: Dockerfile.app
-.docker/Dockerfile.app: .docker .docker/image.esy
-	@$(call EMIT,$(call DOCKERFILE_APP,$(shell cat .docker/image.esy))) > $(@)
+.docker/Dockerfile.app: .docker .docker/image.deps
+	@$(call EMIT,$(call DOCKERFILE_APP,$(shell cat .docker/image.esy),$(shell cat .docker/image.deps))) > $(@)
 
 .dockerignore:
 	@$(call EMIT,$(DOCKERIGNORE)) > $(@)
 
 .docker/image.esy: .docker .dockerignore .docker/Dockerfile.esy
 	@docker build . -f .docker/Dockerfile.esy --iidfile $(@)
+
+.docker/image.deps: .docker .dockerignore .docker/Dockerfile.deps
+	@docker build . -f .docker/Dockerfile.deps --iidfile $(@)
 
 .docker/image.app: .docker .dockerignore .docker/Dockerfile.app
 	@docker build . -f .docker/Dockerfile.app --iidfile $(@)
