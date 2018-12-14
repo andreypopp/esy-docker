@@ -42,6 +42,28 @@ builder container and then copy over needed build artifacts from there:
     COPY --from=builder /app/_esy/default/build/install /app
     RUN /app/bin/myapp.exe
 
+### Generating `esyd` wrapper
+
+`esy-docker` can generate `esyd` command wrapper for `esy` which executes
+commands inside esy environment inside docker.
+
+It also mounts `$PWD/.docker/store` as local project store in docker and thus
+`./esyd build` will perform an incremental builds.
+
+Run:
+
+    % make esyd
+
+which will generate `./esyd` bash script which can be used further with:
+
+    % ./esyd build
+    % ./esyd x hello
+
+and so on.
+
+Note that if you change your project dependencies you need to regenerate `esyd`
+script by executing `make esyd` again.
+
 ## Further Work
 
 - Configure `esy-docker.mk` so that an app builder image can be tagged:

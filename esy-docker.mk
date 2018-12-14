@@ -48,6 +48,7 @@ define DOCKERIGNORE
 .git
 node_modules
 _esy
+esyd
 endef
 
 define DOCKERFILE_DEPS
@@ -68,6 +69,14 @@ RUN mkdir /app
 WORKDIR /app
 COPY . .
 RUN esy fetch
+endef
+
+define ESYD
+#!/bin/bash
+
+APP_IMAGE_ID="$(1)"
+
+docker run -v "$$PWD/.docker/store:/app/_esy/default/store" -it "$$APP_IMAGE_ID" esy "$$@"
 endef
 
 define USAGE
@@ -118,6 +127,10 @@ print-usage:
 
 .docker/image.app: .docker .dockerignore .docker/Dockerfile.app
 	@docker build . -f .docker/Dockerfile.app --iidfile $(@)
+
+esyd: .docker/image.app
+	@$(call EMIT,$(call ESYD,$(shell cat .docker/image.app))) > $(@)
+	@chmod +x $(@)
 
 esy-docker-shell-esy: .docker/image.esy
 	@docker run -it $$(cat .docker/image.esy) /bin/bash
