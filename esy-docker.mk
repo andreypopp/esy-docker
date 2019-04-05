@@ -1,4 +1,5 @@
 SHELL = /bin/bash
+ESY_VERSION = 0.4.3
 
 define newline
 
@@ -19,7 +20,7 @@ RUN mkdir /esy
 WORKDIR /esy
 
 ENV NPM_CONFIG_PREFIX=/esy
-RUN npm install -g --unsafe-perm esy@0.4.3
+RUN npm install -g --unsafe-perm esy@$(ESY_VERSION)
 
 # now that we have esy installed we need a proper runtime
 

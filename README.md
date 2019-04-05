@@ -6,8 +6,7 @@ A set of make rules to produce docker images for esy projects.
 
 ## Usage
 
-A project should have a lockfile generated using a compatible version of esy.
-Currently `esy-docker` depends on esy@0.4.3.
+A project should have a lockfile generated using a compatible version of the esy version in use.
 
 Drop `esy-docker.mk` in your project and create a `Makefile` which includes it:
 
@@ -18,13 +17,14 @@ Drop `esy-docker.mk` in your project and create a `Makefile` which includes it:
 
 Then you can run
 
-    % make build
+    % make build -e ESY_VERSION=v
 
 to build the app within the container and
 
-    % make shell
+    % make shell -e ESY_VERSION=v
 
-to run an interactive bash session inside the container.
+where `v` is the version you want to use, to run an interactive bash session inside the container.
+(If not specified, the defaults esy version is `esy@0.5.6`)
 
 Note the container produced by `esy-docker.mk` isn't suitable for deployment as
 it contains all the build time dependencies (including an entire OCaml toolchain
